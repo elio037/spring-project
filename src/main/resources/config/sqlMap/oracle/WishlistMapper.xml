@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="wishlist.dao.WishlistDAO">
+
+  <select id="exists" parameterType="map" resultType="int">
+    select count(*) from br_wishlist
+     where member_no = #{memberNo} and book_no = #{bookNo}
+  </select>
+
+  <insert id="insert" parameterType="map">
+    insert into br_wishlist(no, member_no, book_no)
+     values(seq_br_wishlist_no.nextval, #{memberNo}, #{bookNo})
+  </insert>
+
+  <delete id="delete" parameterType="map">
+    delete from br_wishlist
+     where member_no = #{memberNo} and book_no = #{bookNo}
+  </delete>
+
+  <!-- 회원이 찜한 책 목록 (도서 정보 조인, 최신순) -->
+  <select id="selectByMember" parameterType="int" resultType="wishlistVO">
+    select w.no, w.member_no as memberNo, w.book_no as bookNo
+         , to_char(w.reg_date, 'yyyy-mm-dd') as regDate
+         , b.title as bookTitle, b.cover
+         , b.review_count as reviewCount, b.avg_rating as avgRating
+      from br_wishlist w
+      join br_book b on b.no = w.book_no
+     where w.member_no = #{memberNo}
+     order by w.no desc
+  </select>
+
+</mapper>

@@ -1,0 +1,21 @@
+# ===== 빌드 산출물 =====
+/target/
+*.war
+*.class
+
+# ===== Eclipse =====
+/.settings/
+/bin/
+.factorypath
+
+# ===== IntelliJ =====
+/.idea/
+*.iml
+
+# ===== 민감 정보 (카카오 API 키 등) =====
+src/main/resources/config/kakao.properties
+
+# ===== OS / 기타 =====
+Thumbs.db
+.DS_Store
+*.log

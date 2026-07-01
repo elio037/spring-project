@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member.dao.MemberDAO">
+
+  <select id="login" parameterType="memberVO" resultType="memberVO">
+    select no, id, password, nickname, role
+         , to_char(reg_date, 'yyyy-mm-dd') as regDate
+      from br_member
+     where id = #{id} and password = #{password}
+  </select>
+
+  <insert id="insertMember" parameterType="memberVO">
+    insert into br_member(no, id, password, nickname)
+     values(seq_br_member_no.nextval, #{id}, #{password}, #{nickname})
+  </insert>
+
+  <select id="countById" parameterType="string" resultType="int">
+    select count(*) from br_member where id = #{id}
+  </select>
+
+  <update id="saveFaceDescriptor" parameterType="memberVO">
+    update br_member
+       set face_descriptor = #{faceDescriptor}
+     where no = #{no}
+  </update>
+
+  <select id="selectAllWithFace" resultType="memberVO">
+    select no, id, nickname, face_descriptor as faceDescriptor
+      from br_member
+     where face_descriptor is not null
+  </select>
+
+  <select id="selectMemberByNo" parameterType="int" resultType="memberVO">
+    select no, id, nickname, role
+         , to_char(reg_date, 'yyyy-mm-dd') as regDate
+      from br_member
+     where no = #{no}
+  </select>
+
+  <select id="selectAllMembers" resultType="memberVO">
+    select no, id, nickname, role
+         , to_char(reg_date, 'yyyy-mm-dd') as regDate
+         , face_descriptor as faceDescriptor
+      from br_member
+     order by no
+  </select>
+
+  <!-- ── 소셜 로그인(카카오 등) ───────────────────────────── -->
+
+  <select id="selectByProviderId" parameterType="memberVO" resultType="memberVO">
+    select no, id, nickname, role, provider, provider_id as providerId
+         , to_char(reg_date, 'yyyy-mm-dd') as regDate
+      from br_member
+     where provider = #{provider} and provider_id = #{providerId}
+  </select>
+
+  <insert id="insertSocialMember" parameterType="memberVO">
+    <selectKey keyProperty="no" resultType="int" order="BEFORE">
+      select seq_br_member_no.nextval from dual
+    </selectKey>
+    insert into br_member(no, id, nickname, provider, provider_id)
+     values(#{no}, #{id}, #{nickname}, #{provider}, #{providerId})
+  </insert>
+
+  <delete id="deleteMember" parameterType="int">
+    delete from br_member where no = #{no}
+  </delete>
+
+</mapper>

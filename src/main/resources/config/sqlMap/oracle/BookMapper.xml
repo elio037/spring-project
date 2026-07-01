@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="book.dao.BookDAO">
+
+  <!-- 제목 검색 (리뷰 많은 순, 최대 50건) -->
+  <select id="searchBooks" parameterType="string" resultType="bookVO">
+    SELECT * FROM (
+      SELECT no, title, review_count AS reviewCount, avg_rating AS avgRating, cover
+        FROM br_book
+       WHERE title LIKE '%' || #{keyword} || '%'
+       ORDER BY review_count DESC
+    ) WHERE ROWNUM &lt;= 50
+  </select>
+
+  <!-- 평점 순 (최소 리뷰 minReviews 이상, order=ASC|DESC) -->
+  <select id="topByRating" parameterType="map" resultType="bookVO">
+    SELECT * FROM (
+      SELECT no, title, review_count AS reviewCount, avg_rating AS avgRating, cover
+        FROM br_book
+       WHERE review_count &gt;= #{minReviews}
+       ORDER BY avg_rating ${order}, review_count DESC
+    ) WHERE ROWNUM &lt;= #{topN}
+  </select>
+
+  <!-- 리뷰 많은 순 -->
+  <select id="topByReviewCount" parameterType="int" resultType="bookVO">
+    SELECT * FROM (
+      SELECT no, title, review_count AS reviewCount, avg_rating AS avgRating, cover
+        FROM br_book
+       ORDER BY review_count DESC
+    ) WHERE ROWNUM &lt;= #{topN}
+  </select>
+
+  <!-- 단일 도서 상세 (제목으로 조회) -->
+  <select id="selectByTitle" parameterType="string" resultType="bookVO">
+    SELECT * FROM (
+      SELECT no, title, cover,
+             review_count AS reviewCount,
+             avg_rating   AS avgRating,
+             dist1, dist2, dist3, dist4, dist5,
+             pos_count AS posCount,
+             neu_count AS neuCount,
+             neg_count AS negCount
+        FROM br_book
+       WHERE title = #{title}
+    ) WHERE ROWNUM = 1
+  </select>
+
+  <!-- 도서별 샘플 리뷰 -->
+  <select id="selectReviews" parameterType="int" resultType="reviewVO">
+    SELECT content, rating
+      FROM br_review
+     WHERE book_no = #{bookNo}
+     ORDER BY rating DESC, no
+  </select>
+
+  <!-- 전체 도서 수 -->
+  <select id="countBooks" resultType="int">
+    SELECT COUNT(*) FROM br_book
+  </select>
+
+  <!-- [관리자] 전체 도서 목록 (표지 관리용) -->
+  <select id="selectAllBooks" resultType="bookVO">
+    SELECT no, title, review_count AS reviewCount, avg_rating AS avgRating, cover
+      FROM br_book
+     ORDER BY no
+  </select>
+
+  <!-- [관리자] 표지 경로 수정 -->
+  <update id="updateCover" parameterType="map">
+    UPDATE br_book SET cover = #{cover} WHERE no = #{no}
+  </update>
+
+</mapper>

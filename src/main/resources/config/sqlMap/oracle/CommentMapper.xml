@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="comment.dao.CommentDAO">
+
+  <insert id="insertComment" parameterType="commentVO">
+    <selectKey keyProperty="no" resultType="int" order="BEFORE">
+      select seq_br_comment_no.nextval from dual
+    </selectKey>
+    insert into br_comment(no, member_no, book_no, content, rating)
+     values(#{no}, #{memberNo}, #{bookNo}, #{content}, #{rating})
+  </insert>
+
+  <!-- 특정 책의 회원 리뷰 목록 (작성자 닉네임 + 좋아요 수/내 좋아요 여부, 최신순) -->
+  <select id="selectByBook" parameterType="map" resultType="commentVO">
+    select c.no, c.member_no as memberNo, c.book_no as bookNo, c.content, c.rating
+         , to_char(c.reg_date, 'yyyy-mm-dd hh24:mi') as regDate
+         , m.nickname
+         , (select count(*) from br_comment_like l where l.comment_no = c.no) as likeCount
+         , (select count(*) from br_comment_like l where l.comment_no = c.no and l.member_no = #{viewerNo,jdbcType=INTEGER}) as likedByMe
+      from br_comment c
+      join br_member m on m.no = c.member_no
+     where c.book_no = #{bookNo}
+     order by c.no desc
+  </select>
+
+  <!-- 특정 회원이 쓴 리뷰 목록 (책 제목 + 좋아요 수, 최신순) -->
+  <select id="selectByMember" parameterType="int" resultType="commentVO">
+    select c.no, c.member_no as memberNo, c.book_no as bookNo, c.content, c.rating
+         , to_char(c.reg_date, 'yyyy-mm-dd hh24:mi') as regDate
+         , b.title as bookTitle
+         , (select count(*) from br_comment_like l where l.comment_no = c.no) as likeCount
+      from br_comment c
+      join br_book b on b.no = c.book_no
+     where c.member_no = #{memberNo}
+     order by c.no desc
+  </select>
+
+  <!-- ── 좋아요 ──────────────────────────────────────── -->
+
+  <select id="existsLike" parameterType="map" resultType="int">
+    select count(*) from br_comment_like
+     where member_no = #{memberNo} and comment_no = #{commentNo}
+  </select>
+
+  <insert id="insertLike" parameterType="map">
+    insert into br_comment_like(no, member_no, comment_no)
+     values(seq_br_comment_like_no.nextval, #{memberNo}, #{commentNo})
+  </insert>
+
+  <delete id="deleteLike" parameterType="map">
+    delete from br_comment_like
+     where member_no = #{memberNo} and comment_no = #{commentNo}
+  </delete>
+
+  <!-- 내가 좋아요한 리뷰 (작성자 닉네임 + 책 제목 + 좋아요 수) -->
+  <select id="selectLikedByMember" parameterType="int" resultType="commentVO">
+    select c.no, c.member_no as memberNo, c.book_no as bookNo, c.content, c.rating
+         , to_char(c.reg_date, 'yyyy-mm-dd hh24:mi') as regDate
+         , m.nickname, b.title as bookTitle
+         , (select count(*) from br_comment_like l2 where l2.comment_no = c.no) as likeCount
+         , 1 as likedByMe
+      from br_comment_like l
+      join br_comment c on c.no = l.comment_no
+      join br_member  m on m.no = c.member_no
+      join br_book    b on b.no = c.book_no
+     where l.member_no = #{memberNo}
+     order by l.no desc
+  </select>
+
+  <select id="selectByNo" parameterType="int" resultType="commentVO">
+    select no, member_no as memberNo, book_no as bookNo, content
+      from br_comment
+     where no = #{no}
+  </select>
+
+  <delete id="deleteComment" parameterType="int">
+    delete from br_comment where no = #{no}
+  </delete>
+
+</mapper>

@@ -1,0 +1,33 @@
+-- =========================================================
+--  회원 댓글 기능용 BR_COMMENT 테이블
+--  접속 계정 : hr / hr
+--  한 번만 실행하세요. (book_review.sql 로 BR_MEMBER, BR_BOOK 가 먼저 있어야 함)
+-- =========================================================
+
+-- 재실행 초기화
+DROP TABLE BR_COMMENT CASCADE CONSTRAINTS;
+DROP SEQUENCE SEQ_BR_COMMENT_NO;
+
+CREATE TABLE BR_COMMENT (
+    NO         NUMBER          PRIMARY KEY,
+    MEMBER_NO  NUMBER          NOT NULL,
+    BOOK_NO    NUMBER          NOT NULL,
+    CONTENT    VARCHAR2(1000)  NOT NULL,
+    RATING     NUMBER(1)       DEFAULT 5 NOT NULL,   -- 별점 1~5
+    REG_DATE   DATE            DEFAULT SYSDATE NOT NULL,
+    -- 회원 탈퇴 시 그 회원의 댓글도 함께 삭제 (ON DELETE CASCADE)
+    CONSTRAINT FK_BR_COMMENT_MEMBER FOREIGN KEY (MEMBER_NO)
+        REFERENCES BR_MEMBER (NO) ON DELETE CASCADE,
+    CONSTRAINT FK_BR_COMMENT_BOOK FOREIGN KEY (BOOK_NO)
+        REFERENCES BR_BOOK (NO)
+);
+
+CREATE SEQUENCE SEQ_BR_COMMENT_NO START WITH 1 INCREMENT BY 1 NOCACHE;
+
+CREATE INDEX IDX_BR_COMMENT_BOOK   ON BR_COMMENT (BOOK_NO);
+CREATE INDEX IDX_BR_COMMENT_MEMBER ON BR_COMMENT (MEMBER_NO);
+
+COMMIT;
+
+-- 확인
+-- SELECT * FROM BR_COMMENT ORDER BY NO DESC;

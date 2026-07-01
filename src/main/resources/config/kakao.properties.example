@@ -1,0 +1,13 @@
+# =========================================================
+#  Kakao Login config (템플릿)
+#  https://developers.kakao.com
+#
+#  사용법: 이 파일을 kakao.properties 로 복사한 뒤 본인 키를 채우세요.
+#         (kakao.properties 는 .gitignore 로 커밋되지 않습니다)
+# =========================================================
+
+# App Settings > App Keys > REST API Key
+kakao.rest-api-key=YOUR_KAKAO_REST_API_KEY
+
+# Product Settings > Kakao Login > Redirect URI (반드시 콘솔 설정과 동일해야 함)
+kakao.redirect-uri=http://localhost:8080/book-review/oauth/kakao/callback
