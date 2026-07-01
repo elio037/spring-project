@@ -7,6 +7,12 @@
 /.settings/
 /bin/
 .factorypath
+/.classpath
+/.project
+
+# ===== 개발 도구 / 발표 자료 (앱 실행 불필요) =====
+/docs/
+/tools/
 
 # ===== IntelliJ =====
 /.idea/
